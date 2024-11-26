@@ -38,6 +38,7 @@ def infer_model(
     include_hiddens: bool = False,
     include_embeddings: bool = False,
     include_logits: bool = False,
+    include_input_ids: bool = False,    
     seq_length: int = 2048,
     micro_batch_size: int = 64,
     precision: PrecisionTypes = "bf16-mixed",
@@ -122,6 +123,7 @@ def infer_model(
         initial_ckpt_path=str(checkpoint_path) if checkpoint_path is not None else None,
         include_embeddings=include_embeddings,
         include_hiddens=include_hiddens,
+        include_input_ids=include_input_ids,        
         skip_logits=not include_logits,
         initial_ckpt_skip_keys_with_these_prefixes=[],  # load everything from the checkpoint.
     )
@@ -152,6 +154,7 @@ def geneformer_infer_entrypoint():
         micro_batch_size=args.micro_batch_size,
         include_embeddings=not args.no_embeddings,
         include_logits=args.include_logits,
+        include_input_ids=args.include_input_ids,        
         seq_length=args.seq_length,
         precision=args.precision,
         devices=args.num_gpus,
@@ -193,7 +196,12 @@ def get_parser():
     parser.add_argument(
         "--include-logits", action="store_true", default=False, help="Include per-token logits in output."
     )
-
+    parser.add_argument(
+        "--include-input-ids",
+        action="store_true",
+        default=False,
+        help="Include input_ids in output of inference",
+    )
     parser.add_argument(
         "--result-path", type=Path, required=False, default=Path("./results.pt"), help="Path to the result file."
     )
