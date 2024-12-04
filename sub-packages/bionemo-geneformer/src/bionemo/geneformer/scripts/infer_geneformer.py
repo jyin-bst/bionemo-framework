@@ -20,6 +20,13 @@ import torch
 from nemo import lightning as nl
 from nemo.utils import logging
 
+
+import sys
+sys.path.insert(0, '/workspace/bionemo-framework/sub-packages/bionemo-core/src/')
+sys.path.insert(0, '/workspace/bionemo-framework/sub-packages/bionemo-geneformer/src/')
+sys.path.insert(0, '/workspace/bionemo-framework/sub-packages/bionemo-llm/src/')
+
+
 from bionemo.core.data.load import load
 from bionemo.core.utils.dtypes import PrecisionTypes, get_autocast_dtype
 from bionemo.geneformer.api import FineTuneSeqLenBioBertConfig, GeneformerConfig
@@ -51,9 +58,9 @@ def infer_model(
 ) -> None:
     """Inference function (requires DDP and only training data that fits in memory)."""
     # This is just used to get the tokenizer :(
-    train_data_path: Path = (
-        load("single_cell/testdata-20240506") / "cellxgene_2023-12-15_small" / "processed_data" / "train"
-    )
+#    train_data_path: Path = (
+#        load("single_cell/testdata-20240506") / "cellxgene_2023-12-15_small" / "processed_data" / "train"
+#    )
 
     # Setup the strategy and trainer
     pipeline_model_parallel_size = 1
@@ -68,11 +75,22 @@ def infer_model(
         pipeline_model_parallel_size=pipeline_model_parallel_size,
     )
 
+#    preprocessor = GeneformerPreprocess(
+#        download_directory=train_data_path,
+#        medians_file_path=train_data_path / "medians.json",
+#        tokenizer_vocab_path=train_data_path / "geneformer.vocab",
+#    )
+
+
     preprocessor = GeneformerPreprocess(
-        download_directory=train_data_path,
-        medians_file_path=train_data_path / "medians.json",
-        tokenizer_vocab_path=train_data_path / "geneformer.vocab",
+        #download_directory=train_data_path,
+        #medians_file_path=train_data_path / "medians.json",
+        #tokenizer_vocab_path=train_data_path / "geneformer.vocab",
+        download_directory="/workspace/bionemo/data/singlecell_tutorial/processed_data/train",
+        medians_file_path="/workspace/bionemo/data/singlecell_tutorial/processed_data/train/medians.json",
+        tokenizer_vocab_path="/workspace/bionemo/data/singlecell_tutorial/processed_data/train/geneformer.vocab",        
     )
+    
     match preprocessor.preprocess():
         case {"tokenizer": tokenizer, "median_dict": median_dict}:
             logging.info("*************** Preprocessing Finished ************")
